@@ -1,0 +1,20 @@
+title = "Flappy Bevy"
+
+[window]
+width = 320.0
+height = 480.0
+
+[bird]
+speed = 120.0
+jump_power = 700.0
+pull_down_power = 2500.0
+collision_radius = 17.5
+texture_radius = 25.0
+
+[pipes]
+width = 40.0
+doorway = 180.0
+interval = 180.0
+
+[borders]
+height = 15.0
