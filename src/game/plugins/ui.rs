@@ -201,6 +201,6 @@ fn hide_ui<T: Component>(mut query: Query<(&T, &mut Style)>) {
 
 fn update_score_label(scores: Res<Scores>, mut query: Query<(&ScoreLabel, &mut Text)>) {
     for (_, mut text) in &mut query {
-        text.sections[0].value = scores.0.to_string();
+        text.sections[0].value = scores.decided.to_string();
     }
 }

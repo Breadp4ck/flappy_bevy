@@ -96,10 +96,14 @@ fn obstacle_collision_check(
                 if obstacles_query.contains(*e1) | obstacles_query.contains(*e2) {
                     next_state.set(GameState::End);
                 }
+
+                if doorways_query.contains(*e1) | doorways_query.contains(*e2) {
+                    scores.maybe += 1;
+                }
             }
             CollisionEvent::Stopped(e1, e2, _) => {
                 if doorways_query.contains(*e1) || doorways_query.contains(*e2) {
-                    scores.0 += 1;
+                    scores.decided = scores.maybe;
                 }
             }
         }
@@ -117,5 +121,7 @@ fn reset(mut scores: ResMut<Scores>, mut query: Query<(&Bird, &mut Transform)>) 
         *transform = Transform::IDENTITY;
     }
 
-    scores.0 = 0;
+    // if we are in doorway, then we remove some scores at the start
+    scores.maybe -= (scores.maybe - scores.decided) + scores.decided;
+    scores.decided = 0;
 }

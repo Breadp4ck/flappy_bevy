@@ -32,7 +32,7 @@ impl Game {
                 BordersPlugin,
             ))
             .insert_resource(ClearColor(BACKGROUND_COLOR))
-            .insert_resource(Scores(0))
+            .insert_resource(Scores::default())
             .insert_resource(config)
             .add_state::<GameState>()
             .add_systems(
