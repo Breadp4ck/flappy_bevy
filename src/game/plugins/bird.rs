@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use crate::config::Config;
-use crate::game::components::{Doorway, Obstacle};
+use crate::game::components::{Doorway, Obstacle, Scores};
 use crate::game::{components::Bird, GameCollisionGroups, GameState};
 
 pub struct BirdPlugin;
@@ -81,6 +81,7 @@ fn falling(config: Res<Config>, time: Res<Time>, mut query: Query<(&Bird, &mut V
 }
 
 fn obstacle_collision_check(
+    mut scores: ResMut<Scores>,
     obstacles_query: Query<&Obstacle>,
     doorways_query: Query<&Doorway>,
     mut next_state: ResMut<NextState<GameState>>,
@@ -95,7 +96,7 @@ fn obstacle_collision_check(
             }
             CollisionEvent::Stopped(e1, e2, _) => {
                 if doorways_query.contains(*e1) || doorways_query.contains(*e2) {
-                    println!("Score!");
+                    scores.0 += 1;
                 }
             }
         }
@@ -108,8 +109,10 @@ fn freeze(mut query: Query<(&Bird, &mut Velocity)>) {
     }
 }
 
-fn reset(mut query: Query<(&Bird, &mut Transform)>) {
+fn reset(mut scores: ResMut<Scores>, mut query: Query<(&Bird, &mut Transform)>) {
     for (_, mut transform) in &mut query {
         *transform = Transform::IDENTITY;
     }
+
+    scores.0 = 0;
 }

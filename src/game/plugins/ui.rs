@@ -1,12 +1,16 @@
 use bevy::prelude::*;
 
-use crate::game::GameState;
+use crate::game::{components::Scores, GameState};
 
 pub struct UiPlugin;
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_ui)
+            .add_systems(
+                FixedUpdate,
+                update_score_label.run_if(in_state(GameState::Game)),
+            )
             .add_systems(OnEnter(GameState::Greet), show_ui::<GreetUi>)
             .add_systems(OnExit(GameState::Greet), hide_ui::<GreetUi>)
             .add_systems(OnEnter(GameState::Pause), show_ui::<PauseUi>)
@@ -29,6 +33,9 @@ struct GameUi;
 
 #[derive(Component)]
 struct EndUi;
+
+#[derive(Component)]
+struct ScoreLabel;
 
 fn spawn_ui(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
@@ -58,6 +65,26 @@ fn spawn_ui(mut commands: Commands) {
                     ..default()
                 })
                 .with_children(|parent| {
+                    parent
+                        .spawn(
+                            TextBundle::from_section(
+                                "",
+                                TextStyle {
+                                    font_size: 32.0,
+                                    color: Color::ORANGE_RED,
+                                    ..default()
+                                },
+                            )
+                            .with_text_alignment(TextAlignment::Center)
+                            .with_style(Style {
+                                display: Display::None,
+                                bottom: Val::Px(70.),
+                                ..default()
+                            }),
+                        )
+                        .insert(EndUi)
+                        .insert(ScoreLabel);
+
                     parent
                         .spawn(
                             TextBundle::from_section(
@@ -134,6 +161,29 @@ fn spawn_ui(mut commands: Commands) {
                         )
                         .insert(PauseUi);
                 });
+
+            parent
+                .spawn(
+                    TextBundle::from_section(
+                        "",
+                        TextStyle {
+                            font_size: 22.0,
+                            color: Color::WHITE,
+                            ..default()
+                        },
+                    )
+                    .with_text_alignment(TextAlignment::Center)
+                    .with_style(Style {
+                        position_type: PositionType::Absolute,
+                        display: Display::None,
+                        top: Val::Px(20.),
+                        right: Val::Px(20.),
+                        ..default()
+                    }),
+                )
+                .insert(GameUi)
+                .insert(PauseUi)
+                .insert(ScoreLabel);
         });
 }
 
@@ -146,5 +196,11 @@ fn show_ui<T: Component>(mut query: Query<(&T, &mut Style)>) {
 fn hide_ui<T: Component>(mut query: Query<(&T, &mut Style)>) {
     for (_, mut style) in &mut query {
         style.display = Display::None;
+    }
+}
+
+fn update_score_label(scores: Res<Scores>, mut query: Query<(&ScoreLabel, &mut Text)>) {
+    for (_, mut text) in &mut query {
+        text.sections[0].value = scores.0.to_string();
     }
 }
