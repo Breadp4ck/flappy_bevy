@@ -11,3 +11,9 @@ pub struct Pipe;
 
 #[derive(Default, Component)]
 pub struct Border;
+
+#[derive(Default, Component)]
+pub struct Obstacle;
+
+#[derive(Default, Component)]
+pub struct Doorway;

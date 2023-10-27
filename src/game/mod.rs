@@ -56,6 +56,12 @@ enum GameState {
     End,
 }
 
+enum GameCollisionGroups {
+    Bird = 0b0001,
+    Obstacle = 0b0010,
+    Doorway = 0b0100,
+}
+
 fn pause(keys: Res<Input<KeyCode>>, mut next_state: ResMut<NextState<GameState>>) {
     if keys.just_pressed(KeyCode::Escape) {
         next_state.set(GameState::Pause);

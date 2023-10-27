@@ -1,7 +1,14 @@
 use bevy::{prelude::*, sprite::*};
 use bevy_rapier2d::prelude::*;
 
-use crate::{config::Config, game::components::Border, OBSTACLES_COLOR};
+use crate::{
+    config::Config,
+    game::{
+        components::{Border, Obstacle},
+        GameCollisionGroups,
+    },
+    OBSTACLES_COLOR,
+};
 
 pub struct BordersPlugin;
 
@@ -42,6 +49,11 @@ fn spawn_borders(
         .spawn(Border::default())
         .insert(SpatialBundle::default())
         .insert(RigidBody::Fixed)
+        .insert(CollisionGroups::new(
+            Group::from_bits_truncate(GameCollisionGroups::Obstacle as u32),
+            Group::from_bits_truncate(GameCollisionGroups::Bird as u32),
+        ))
+        .insert(Obstacle)
         .insert(collider.clone())
         .with_children(|parent| {
             parent.spawn(MaterialMesh2dBundle {

@@ -1,6 +1,9 @@
 use crate::{
     config::Config,
-    game::{components::Pipe, GameState},
+    game::{
+        components::{Doorway, Obstacle, Pipe},
+        GameCollisionGroups, GameState,
+    },
     utils::{get_random_pipe_v_offset, total_pipes},
     OBSTACLES_COLOR,
 };
@@ -66,6 +69,11 @@ fn spawn_pipes(
                 get_random_pipe_v_offset(),
                 0.,
             ))
+            .insert(CollisionGroups::new(
+                Group::from_bits_truncate(GameCollisionGroups::Obstacle as u32),
+                Group::from_bits_truncate(GameCollisionGroups::Bird as u32),
+            ))
+            .insert(Obstacle)
             .insert(GlobalTransform::IDENTITY)
             .with_children(|parent| {
                 parent.spawn(MaterialMesh2dBundle {
@@ -80,6 +88,21 @@ fn spawn_pipes(
                     transform: Transform::from_translation(-pipe_mesh_offset),
                     ..default()
                 });
+                parent
+                    .spawn(Collider::cuboid(
+                        config.pipes.width / 2.,
+                        config.pipes.doorway / 2.,
+                    ))
+                    .insert(RigidBody::KinematicVelocityBased)
+                    .insert(CollisionGroups::new(
+                        Group::from_bits_truncate(GameCollisionGroups::Doorway as u32),
+                        Group::from_bits_truncate(GameCollisionGroups::Bird as u32),
+                    ))
+                    .insert(Velocity::default())
+                    .insert(Sensor)
+                    .insert(Doorway)
+                    .insert(Transform::IDENTITY)
+                    .insert(GlobalTransform::IDENTITY);
             });
     }
 }

@@ -2,7 +2,8 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use crate::config::Config;
-use crate::game::{components::Bird, GameState};
+use crate::game::components::{Doorway, Obstacle};
+use crate::game::{components::Bird, GameCollisionGroups, GameState};
 
 pub struct BirdPlugin;
 
@@ -25,6 +26,12 @@ fn spawn_bird(config: Res<Config>, mut commands: Commands, asset_server: Res<Ass
     commands
         .spawn(Bird::default())
         .insert(RigidBody::Dynamic)
+        .insert(CollisionGroups::new(
+            Group::from_bits_truncate(GameCollisionGroups::Bird as u32),
+            Group::from_bits_truncate(
+                GameCollisionGroups::Obstacle as u32 | GameCollisionGroups::Doorway as u32,
+            ),
+        ))
         .insert(GravityScale(0.))
         .insert(ActiveEvents::COLLISION_EVENTS)
         .insert(Velocity::default())
@@ -74,12 +81,23 @@ fn falling(config: Res<Config>, time: Res<Time>, mut query: Query<(&Bird, &mut V
 }
 
 fn obstacle_collision_check(
+    obstacles_query: Query<&Obstacle>,
+    doorways_query: Query<&Doorway>,
     mut next_state: ResMut<NextState<GameState>>,
     mut collision_events: EventReader<CollisionEvent>,
 ) {
-    if let Some(event) = collision_events.iter().next() {
-        if let CollisionEvent::Started(_, _, _) = event {
-            next_state.set(GameState::End);
+    for event in collision_events.iter() {
+        match event {
+            CollisionEvent::Started(e1, e2, _) => {
+                if obstacles_query.contains(*e1) | obstacles_query.contains(*e2) {
+                    next_state.set(GameState::End);
+                }
+            }
+            CollisionEvent::Stopped(e1, e2, _) => {
+                if doorways_query.contains(*e1) || doorways_query.contains(*e2) {
+                    println!("Score!");
+                }
+            }
         }
     }
 }
