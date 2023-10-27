@@ -146,7 +146,7 @@ fn spawn_ui(mut commands: Commands) {
                     parent
                         .spawn(
                             TextBundle::from_section(
-                                "Press <Space> or <Esc> to resume game",
+                                "Press <Space> or <Esc> to resume game\n(with or without jump)",
                                 TextStyle {
                                     font_size: 12.0,
                                     color: Color::WHITE,

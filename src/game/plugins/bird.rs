@@ -10,7 +10,10 @@ pub struct BirdPlugin;
 impl Plugin for BirdPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_bird)
-            .add_systems(Update, handle_jump.run_if(in_state(GameState::Game)))
+            .add_systems(
+                Update,
+                handle_jump.run_if(in_state(GameState::Game).or_else(in_state(GameState::Pause))),
+            )
             .add_systems(
                 FixedUpdate,
                 (falling, obstacle_collision_check).run_if(in_state(GameState::Game)),
